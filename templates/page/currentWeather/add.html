@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>新增全国气象</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../static/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../static/css/public.css" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label required">省份</label>
+        <div class="layui-input-block">
+            <select name="province" lay-verify="required" lay-filter="province" id="province">
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">城市</label>
+        <div class="layui-input-block">
+            <select name="cityname" lay-verify="required" id="cityname">
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label required">日期</label>
+        <div class="layui-input-block">
+            <input type="text" name="record_date" id="record_date" lay-verify="required" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label required">时间</label>
+        <div class="layui-input-inline" style="width: 80px;">
+            <input type="number" name="record_time_h" placeholder="小时" autocomplete="off" class="layui-input"
+                   lay-verify="required"
+                   onkeyup="value=value.replace(/[^\d]/g,'').replace(/^0{1,}/g,'')">
+        </div>
+        <div class="layui-form-mid">:</div>
+        <div class="layui-input-inline" style="width: 80px;">
+            <input type="number" name="record_time_m" placeholder="分钟" autocomplete="off" class="layui-input"
+                   lay-verify="required"
+                   onkeyup="value=value.replace(/[^\d]/g,'').replace(/^0{1,}/g,'')">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label required">温度</label>
+        <div class="layui-input-block">
+            <input type="number" name="temp" placeholder="请输入温度℃" lay-verify="required" value=""
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">风向</label>
+        <div class="layui-input-block">
+            <select name="wd" lay-verify="required">
+                {% for wd in wd_list %}
+                    <option value="{{ wd }}">{{ wd }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item required">
+        <label class="layui-form-label">风力</label>
+        <div class="layui-input-block">
+            <input type="number" name="ws" placeholder="请输入风力（1-10级）" value="" class="layui-input"
+                   lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item required">
+        <label class="layui-form-label">风速</label>
+        <div class="layui-input-block">
+            <input type="number" name="wse" placeholder="请输入风速(km/h)" value="" class="layui-input"
+                   lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">湿度</label>
+        <div class="layui-input-block">
+            <input type="text" name="sd" placeholder="请输入湿度" value="" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">天气</label>
+        <div class="layui-input-block">
+            <select name="weather" lay-verify="required">
+                {% for weather in weather_list %}
+                    <option value="{{ weather }}">{{ weather }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">AQI</label>
+        <div class="layui-input-block">
+            <input type="number" name="aqi" placeholder="请输入AQI" value="" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认</button>
+        </div>
+    </div>
+</div>
+<script src="../../../static/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'laydate', 'layer'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate,
+            $ = layui.$;
+        laydate.render({
+            elem: '#record_date'
+        })
+
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            data = data.field
+            if (!data.record_time_h || data.record_time_h < 0 || data.record_time_h >= 24) {
+                return layer.msg("请输入正确的小时", {icon: 5});
+            }
+            if (!data.record_time_m || data.record_time_m < 0 || data.record_time_m >= 24) {
+                return layer.msg("请输入正确的分钟", {icon: 5});
+            }
+            data.record_time = data.record_time_h + ":" + data.record_time_m
+            if (!data.ws || data.ws < 0 || data.ws > 10) {
+                return layer.msg("请输入正确的风力", {icon: 5});
+            }
+            if (!data.ws || data.wse < 0) {
+                return layer.msg("请输入正确的风速", {icon: 5});
+            }
+            if (!data.aqi || data.aqi < 0) {
+                return layer.msg("请输入正确的AQI", {icon: 5});
+            }
+            $.post('/add/current/weather', data, function (response) {
+                if (response.success) {
+                    var iframeIndex = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(iframeIndex);
+                    parent.reload();
+                    parent.layer.msg(response.msg, {icon: 6});
+                } else {
+                    parent.layer.msg(response.msg, {icon: 5});
+                }
+            })
+            return false;
+        });
+
+        window.onChange = function (v) {
+            v = v || $('#province').val() || '西安';
+            let city_list = {
+                "北京": ["北京", "海淀", "朝阳", "顺义", "怀柔", "通州", "昌平", "延庆", "丰台", "石景山", "大兴", "房山", "密云", "门头沟", "平谷"],
+                "上海": ["上海", "闵行", "宝山", "嘉定", "南汇", "金山", "青浦", "松江", "奉贤", "崇明", "徐家汇", "浦东"],
+                "天津": ["天津", "武清", "宝坻", "东丽", "西青", "北辰", "宁河", "汉沽", "静海", "津南", "塘沽", "大港", "蓟县"],
+                "重庆": ["重庆", "永川", "合川", "南川", "江津", "万盛", "渝北", "北碚", "巴南", "长寿", "黔江", "万州", "涪陵", "开县", "城口", "云阳", "巫溪", "奉节", "巫山", "潼南", "垫江", "梁平", "忠县", "石柱", "大足", "荣昌", "铜梁", "璧山", "丰都", "武隆", "彭水", "綦江", "酉阳", "秀山"],
+                "黑龙江": ["哈尔滨", "齐齐哈尔", "牡丹江", "佳木斯", "绥化", "黑河", "大兴安岭", "伊春", "大庆", "七台河", "鸡西", "鹤岗", "双鸭山"],
+                "吉林": ["长春", "吉林", "延边", "四平", "通化", "白城", "辽源", "松原", "白山"],
+                "辽宁": ["沈阳", "大连", "鞍山", "抚顺", "本溪", "丹东", "锦州", "营口", "阜新", "辽阳", "铁岭", "盘锦", "葫芦岛"],
+                "内蒙古": ["呼和浩特", "包头", "乌海", "乌兰察布", "通辽", "赤峰", "鄂尔多斯", "巴彦淖尔", "锡林郭勒", "呼伦贝尔", "兴安盟", "阿拉善盟"],
+                "河北": ["石家庄", "保定", "张家口", "承德", "唐山", "廊坊", "沧州", "衡水", "邢台", "邯郸", "秦皇岛"],
+                "山西": ["太原", "大同", "阳泉", "晋中", "长治", "晋城", "临汾", "运城", "朔州", "忻州", "吕梁"],
+                "陕西": ["西安", "咸阳", "延安", "榆林", "渭南", "商洛", "安康", "汉中", "宝鸡", "铜川", "杨凌"],
+                "山东": ["济南", "青岛", "淄博", "德州", "烟台", "潍坊", "济宁", "泰安", "临沂", "菏泽", "滨州", "东营", "威海", "枣庄", "日照", "莱芜", "聊城"],
+                "新疆": ["乌鲁木齐", "克拉玛依", "石河子", "昌吉", "吐鲁番", "巴州", "阿拉尔", "阿克苏", "喀什", "伊犁", "塔城", "哈密", "和田", "阿勒泰", "克州", "博州"],
+                "西藏": ["拉萨", "日喀则", "山南", "林芝", "昌都", "那曲", "阿里"],
+                "青海": ["西宁", "海东", "黄南", "海南", "果洛", "玉树", "海西", "海北", "格尔木"],
+                "甘肃": ["兰州", "定西", "平凉", "庆阳", "武威", "金昌", "张掖", "酒泉", "天水", "陇南", "临夏", "甘南", "白银", "嘉峪关"],
+                "宁夏": ["银川", "石嘴山", "吴忠", "固原", "中卫"],
+                "河南": ["郑州", "安阳", "新乡", "许昌", "平顶山", "信阳", "南阳", "开封", "洛阳", "商丘", "焦作", "鹤壁", "濮阳", "周口", "漯河", "驻马店", "三门峡", "济源"],
+                "江苏": ["南京", "无锡", "镇江", "苏州", "南通", "扬州", "盐城", "徐州", "淮安", "连云港", "常州", "泰州", "宿迁"],
+                "湖北": ["武汉", "襄阳", "鄂州", "孝感", "黄冈", "黄石", "咸宁", "荆州", "宜昌", "恩施", "十堰", "神农架", "随州", "荆门", "天门", "仙桃", "潜江"],
+                "浙江": ["杭州", "湖州", "嘉兴", "宁波", "绍兴", "台州", "温州", "丽水", "金华", "衢州", "舟山"],
+                "安徽": ["合肥", "蚌埠", "芜湖", "淮南", "马鞍山", "安庆", "宿州", "阜阳", "亳州", "黄山", "滁州", "淮北", "铜陵", "宣城", "六安", "巢湖", "池州"],
+                "福建": ["福州", "厦门", "宁德", "莆田", "泉州", "漳州", "龙岩", "三明", "南平"],
+                "江西": ["南昌", "九江", "上饶", "抚州", "宜春", "吉安", "赣州", "景德镇", "萍乡", "新余", "鹰潭"],
+                "湖南": ["长沙", "湘潭", "株洲", "衡阳", "郴州", "常德", "益阳", "娄底", "邵阳", "岳阳", "张家界", "怀化", "永州", "湘西"],
+                "贵州": ["贵阳", "遵义", "安顺", "黔南", "黔东南", "铜仁", "毕节", "六盘水", "黔西南"],
+                "四川": ["成都", "攀枝花", "自贡", "绵阳", "南充", "达州", "遂宁", "广安", "巴中", "泸州", "宜宾", "内江", "资阳", "乐山", "眉山", "凉山", "雅安", "甘孜", "阿坝", "德阳", "广元"],
+                "广东": ["广州", "韶关", "惠州", "梅州", "汕头", "深圳", "珠海", "佛山", "肇庆", "湛江", "江门", "河源", "清远", "云浮", "潮州", "东莞", "中山", "阳江", "揭阳", "茂名", "汕尾"],
+                "云南": ["昆明", "大理", "红河", "曲靖", "保山", "文山", "玉溪", "楚雄", "普洱", "昭通", "临沧", "怒江", "迪庆", "丽江", "德宏", "西双版纳"],
+                "广西": ["南宁", "崇左", "柳州", "来宾", "桂林", "梧州", "贺州", "贵港", "玉林", "百色", "钦州", "河池", "北海", "防城港"],
+                "香港": ["香港"],
+                "澳门": ["澳门"],
+                "台湾": ["台北", "高雄", "台中"]
+            }
+            let list = city_list[v]
+            let html_text = ""
+            list.forEach(i => {
+                html_text += "<option value='" + i + "'>" + i + "</option>"
+            })
+            $("#cityname").html(html_text)
+            form.render()
+        }
+
+        function load_province() {
+            //渲染省份
+            let province = ['北京', '上海', '天津', '重庆', '黑龙江', '吉林', '辽宁', '内蒙古', '河北', '山西', '陕西', '山东', '新疆', '西藏', '青海', '甘肃', '宁夏', '河南', '江苏', '湖北', '浙江', '安徽', '福建', '江西', '湖南', '贵州', '四川', '广东', '云南', '广西', '香港', '澳门', '台湾']
+            let html_text = ""
+            province.forEach(i => {
+                html_text += "<option value='" + i + "'>" + i + "</option>"
+            })
+            $("#province").html(html_text)
+        }
+
+        form.on('select(province)', function (data) {
+            onChange(data.value)
+        })
+
+        load_province()
+        onChange()
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>气象预测分析</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../static/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../static/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../../static/css/public.css" media="all">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .top-panel > .layui-card-body {
+            height: 60px;
+        }
+
+        .top-panel-number {
+            line-height: 60px;
+            font-size: 30px;
+            border-right: 1px solid #eceff9;
+        }
+
+        .top-panel-tips {
+            line-height: 30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<!--<div class="layuimini-container">-->
+<div class="layuimini-main">
+
+    <div class="table-search-fieldset" style="background-color:#ffffff;margin-bottom: 10pt;padding: 10px 10px 5px 10px">
+
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">城市</label>
+                        <div class="layui-input-inline">
+                            <select name="cityname" lay-verify="required" id="cityname">
+                                <option value="西安">西安</option>
+                                <option value="新城">新城</option>
+                                <option value="碑林">碑林</option>
+                                <option value="莲湖">莲湖</option>
+                                <option value="灞桥">灞桥</option>
+                                <option value="未央">未央</option>
+                                <option value="雁塔">雁塔</option>
+                                <option value="阎良">阎良</option>
+                                <option value="临潼">临潼</option>
+                                <option value="长安">长安</option>
+                                <option value="高陵">高陵</option>
+                                <option value="蓝田">蓝田</option>
+				<option value="周至">周至</option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-inline">
+                                   <span class="layui-btn layui-btn-primary" onclick="changeCity()"><i
+                                           class="layui-icon"></i> 搜 索
+                        </span>
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md4">
+            <div style="background-color:#ffffff;min-height:240px;padding: 10px">
+                <table class="layui-table">
+                    <colgroup>
+                        <col width="100">
+                        <col width="200">
+                        <col>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <td>地区</td>
+                        <td id="area">西安西安</td>
+                    </tr>
+                    <tr>
+                        <td id="day1">2023-05-01</td>
+                        <td id="weather1">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day2">2023-05-01</td>
+                        <td id="weather2">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day3">2023-05-01</td>
+                        <td id="weather3">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day4">2023-05-01</td>
+                        <td id="weather4">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day5">2023-05-01</td>
+                        <td id="weather5">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day6">2023-05-01</td>
+                        <td id="weather6">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day7">2023-05-01</td>
+                        <td id="weather7">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day8">2023-05-01</td>
+                        <td id="weather8">多云转晴</td>
+                    </tr>
+
+                    <tr>
+                        <td id="day9">2023-05-01</td>
+                        <td id="weather9">多云转晴</td>
+                    </tr>
+                    <tr>
+                        <td id="day10">2023-05-01</td>
+                        <td id="weather10">多云转晴</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="layui-col-xs12 layui-col-md8">
+            <div id="temp-records" style="background-color:#ffffff;min-height:450px;padding: 10px"></div>
+        </div>
+    </div>
+
+</div>
+<!--</div>-->
+<script src="../../static/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../../static/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts', 'form'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            form = layui.form,
+            echarts = layui.echarts;
+
+
+        data_predict()
+
+        form.on('select(province)', function (data) {
+            onChange(data.value)
+        })
+
+        function data_predict() {
+            let city = $("#cityname").val() || "西安"
+            $.post('/data/weather/predict?city=' + city, '', function (res) {
+                let data = res;
+                let weather_list = data.weather_list
+                let days = data.days
+                let t1 = data.t1
+                let t2 = data.t2
+                $("#area").html("西安" + city)
+                for (let i = 0; i <= weather_list.length; i++) {
+                    if (weather_list[i]) {
+                        $("#day" + (i + 1)).html(weather_list[i]["day"])
+                        $("#weather" + (i + 1)).html(weather_list[i]["weather"])
+                    }
+
+                }
+                /**
+                 * 报表功能
+                 */
+                var tempRecords = echarts.init(document.getElementById('temp-records'), 'walden');
+
+                var optionRecords = {
+                    title: {
+                        text: '未来10天温度变化'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {},
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            dataView: {readOnly: false},
+                            magicType: {type: ['line', 'bar']},
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: days
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value} °C'
+                        }
+                    },
+                    series: [
+                        {
+                            name: '最高温',
+                            type: 'line',
+                            data: t1,
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: 'Max'},
+                                    {type: 'min', name: 'Min'}
+                                ]
+                            },
+                            markLine: {
+                                data: [{type: 'average', name: 'Avg'}]
+                            }
+                        },
+                        {
+                            name: '最低温',
+                            type: 'line',
+                            data: t2,
+                            markPoint: {
+                                data: [{name: '最低', value: -2, xAxis: 1, yAxis: -1.5}]
+                            },
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: 'Avg'},
+                                    [
+                                        {
+                                            symbol: 'none',
+                                            x: '90%',
+                                            yAxis: 'max'
+                                        },
+                                        {
+                                            symbol: 'circle',
+                                            label: {
+                                                position: 'start',
+                                                formatter: 'Max'
+                                            },
+                                            type: 'max',
+                                            name: '高点'
+                                        }
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                };
+                tempRecords.setOption(optionRecords);
+
+
+                // echarts 窗口缩放自适应
+                window.onresize = function () {
+                    tempRecords.resize();
+                }
+            })
+        }
+
+        // 监听搜索操作
+        window.changeCity = function () {
+            data_predict()
+        }
+    });
+</script>
+</body>
+</html>

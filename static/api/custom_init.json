@@ -1,0 +1,61 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "page/welcome.html"
+  },
+  "logoInfo": {
+    "title": "基于Python气象数据采集分析可视化预测系统",
+    "image": "static/images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "气象分析",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "控制台",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "主页",
+              "href": "page/welcome.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "数据分析",
+          "href": "",
+          "icon": "fa fa-bar-chart",
+          "target": "_self",
+          "child": [
+            {
+              "title": "城市数据分析",
+              "href": "page/cityAnalyse.html",
+              "icon": "fa fa-line-chart",
+              "target": "_self"
+            },
+            {
+              "title": "上海气象分析",
+              "href": "page/historyAnalyse.html",
+              "icon": "fa fa-pie-chart",
+              "target": "_self"
+            },
+            {
+              "title": "气象分预测析",
+              "href": "page/cityPredict.html",
+              "icon": "fa fa-database",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

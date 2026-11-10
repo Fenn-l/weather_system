@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>主页</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../static/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../static/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../../static/css/public.css" media="all">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .top-panel > .layui-card-body {
+            height: 60px;
+        }
+
+        .top-panel-number {
+            line-height: 60px;
+            font-size: 30px;
+            border-right: 1px solid #eceff9;
+        }
+
+        .top-panel-tips {
+            line-height: 30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<!--<div class="layuimini-container">-->
+<div class="layuimini-main">
+
+    <div class="layui-row layui-col-space15" id="num_data">
+        <div class="layui-col-xs12 layui-col-md3">
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">当天气象数据量</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs12 layui-col-md12 top-panel-number">
+                            345
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">本周气象数据量</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs12 layui-col-md12 top-panel-number">
+                            2541
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">本月气象数据量</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs12 layui-col-md12 top-panel-number">
+                            3213
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+
+            <div class="layui-card top-panel">
+                <div class="layui-card-header">总气象数据量</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5">
+                        <div class="layui-col-xs12 layui-col-md12 top-panel-number">
+                            12311
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md6">
+            <table class="layui-table">
+                <colgroup>
+                    <col width="150">
+                    <col width="200">
+                    <col>
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>城市</th>
+                    <th>时间</th>
+                    <th>天气</th>
+                    <th>温度</th>
+                    <th>风向</th>
+                    <th>风级</th>
+                    <th>AQI</th>
+                </tr>
+                </thead>
+                <tbody id="table_data">
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-col-xs12 layui-col-md6">
+            <div id="echarts-rain" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+        </div>
+    </div>
+
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md6">
+            <div id="echarts-high" style="background-color:#ffffff;min-height:500px;padding: 10px"></div>
+        </div>
+        <div class="layui-col-xs12 layui-col-md6">
+            <div id="echarts-low" style="background-color:#ffffff;min-height:500px;padding: 10px"></div>
+        </div>
+    </div>
+
+
+</div>
+<!--</div>-->
+<script src="../../static/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../../static/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+        load_data()
+
+        function load_data() {
+            $.post('/data/home/weather', '', function (res) {
+                let num_data = res.num_data;
+                let table_data = res.table_data;
+                let num_html = '';
+                for (let i in num_data) {
+                    for (let key in num_data[i]) {
+                        num_html += '<div class="layui-col-xs12 layui-col-md3"> ' +
+                            '<div class="layui-card top-panel">' +
+                            '<div class="layui-card-header">' + key + '城市数量</div>' +
+                            ' <div class="layui-card-body"> ' +
+                            ' <div class="layui-row layui-col-space5">' +
+                            ' <div class="layui-col-xs12 layui-col-md12 top-panel-number"> ' + num_data[i][key] + ' </div> </div></div></div> </div>'
+                        break;
+                    }
+                }
+
+                $('#num_data').html(num_html)
+                let table_html = '';
+                for (let i in table_data) {
+                    let item = table_data[i]
+
+                    table_html += '<tr><td>' + item['cityname'] + '</td><td>' + item['record_date'] + ' ' + item['record_time'] + '</td><td>' + item['weather'] + '</td> <td>' + item['temp'] + '℃</td><td>' + item['wd'] + '</td><td>' + item['ws'] + '级</td><td>' + item['aqi'] + '</td></tr>'
+
+                }
+
+                $('#table_data').html(table_html)
+
+
+                var echartsHigh = echarts.init(document.getElementById('echarts-high'), 'walden');
+
+                var optionHigh = {
+                    title: {
+                        text: '全国温度排行',
+                        left: 'center'
+                    }, tooltip: {
+                        trigger: 'axis',
+                        formatter(params) {
+                            var relVal = params[0].name;
+                            for (var i = 0, l = params.length; i < l; i++) {
+                                //遍历出来的值一般是字符串，需要转换成数字，再进项tiFixed四舍五入
+                                relVal += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + params[i].value['温度'] + '℃'
+                            }
+                            return relVal;
+                        },
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    dataset: {
+                        dimensions: ['city', '温度'],
+                        source: res.temp_data
+                    },
+                    xAxis: {
+                        type: 'category',
+                        axisLabel: {
+                            interval: 0, // 强制显示完整
+                        }
+                    },
+                    yAxis: {
+                        type: "value",
+                        axisLabel: {
+                            formatter: '{value} ℃'
+                        }
+                    },
+                    // Declare several bar series, each will be mapped
+                    // to a column of dataset.source by default.
+                    series: [
+
+                        {type: 'bar'}
+                    ]
+                };
+
+                echartsHigh.setOption(optionHigh);
+
+                var echartsLow = echarts.init(document.getElementById('echarts-low'), 'walden');
+
+                var optionLow = {
+                    title: {
+                        text: '全国空气质量排行',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    yAxis: {},
+                    dataset: {
+                        dimensions: ['city', 'AQI'],
+                        source: res.aqi_data
+                    },
+                    xAxis: {
+                        type: 'category',
+                        axisLabel: {
+                            interval: 0, // 强制显示完整
+                        }
+                    },
+                    yAxis: {},
+                    // Declare several bar series, each will be mapped
+                    // to a column of dataset.source by default.
+                    series: [
+
+                        {type: 'bar'}
+                    ]
+                };
+
+                echartsLow.setOption(optionLow);
+                var echartsRain = echarts.init(document.getElementById('echarts-rain'), 'walden');
+
+                var optionRain = {
+                    title: {
+                        text: '全国降雨量排行',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter(params) {
+                            var relVal = params[0].name;
+                            for (var i = 0, l = params.length; i < l; i++) {
+                                //遍历出来的值一般是字符串，需要转换成数字，再进项tiFixed四舍五入
+                                relVal += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + Number(params[i].value['降雨量']).toFixed(2) + 'mm'
+                            }
+                            return relVal;
+                        },
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    dataset: {
+                        dimensions: ['city', '降雨量'],
+                        source: res.rain_data
+                    },
+                    xAxis: {
+                        type: 'category',
+                        axisLabel: {
+                            interval: 0, // 强制显示完整
+                        }
+                    },
+                    yAxis: {
+                        type: "value",
+                        axisLabel: {
+                            formatter: '{value} mm'
+                        }
+                    },
+                    series: [
+                        {type: 'bar'}
+                    ]
+                };
+
+                echartsRain.setOption(optionRain);
+
+
+                // echarts 窗口缩放自适应
+                window.onresize = function () {
+                    echartsRain.resize();
+                    echartsHigh.resize();
+                    echartsLow.resize();
+                }
+            })
+        }
+
+        $.get("/get/notice/new", '', function (res) {
+            if (res.success) {
+                layer.open({
+                    type: 1,
+                    title: '公告',
+                    area: ['500px', 'auto'], //宽高
+                    content: '<div style="padding: 10px 20px 40px 20px"><h2>' + res.data.title + '</h2></br><p style="font-size: 16px">' + res.data.content + '</p></br><p style="color: #6b6b6b">发布人:' + res.data.user_name + '</p><p style="color: #6b6b6b">时间：' + res.data.create_time + '</p></div>'
+                });
+            }
+        })
+    });
+</script>
+</body>
+</html>

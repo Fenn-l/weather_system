@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>历史气象数据分析</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../static/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../static/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../../static/css/public.css" media="all">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .top-panel > .layui-card-body {
+            height: 60px;
+        }
+
+        .top-panel-number {
+            line-height: 60px;
+            font-size: 30px;
+            border-right: 1px solid #eceff9;
+        }
+
+        .top-panel-tips {
+            line-height: 30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<!--<div class="layuimini-container">-->
+<div class="layuimini-main">
+
+
+    <div class="table-search-fieldset" style="background-color:#ffffff;margin-bottom: 10pt;padding: 10px 10px 5px 10px">
+
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane" action="">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">城市</label>
+                        <div class="layui-input-inline">
+                            <select name="cityname" lay-verify="required" id="cityname">
+                                <option value="西安">西安</option>
+                                <option value="新城">新城</option>
+                                <option value="碑林">碑林</option>
+                                <option value="莲湖">莲湖</option>
+                                <option value="灞桥">灞桥</option>
+                                <option value="未央">未央</option>
+                                <option value="雁塔">雁塔</option>
+                                <option value="阎良">阎良</option>
+                                <option value="临潼">临潼</option>
+                                <option value="长安">长安</option>
+                                <option value="高陵">高陵</option>
+                                <option value="蓝田">蓝田</option>
+				<option value="周至">周至</option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-inline">
+                        <span class="layui-btn layui-btn-primary" onclick="changeCity()"><i
+                                class="layui-icon"></i> 搜 索
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md4">
+            <div id="weather-pies" style="background-color:#ffffff;min-height:400px;padding: 10px">
+            </div>
+        </div>
+        <div class="layui-col-xs12 layui-col-md8">
+            <div id="temp-records" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md6">
+            <div id="wd-pies" style="background-color:#ffffff;min-height:400px;padding: 10px">
+            </div>
+        </div>
+        <div class="layui-col-xs12 layui-col-md6">
+            <div id="ws-pies" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+        </div>
+    </div>
+
+</div>
+<!--</div>-->
+<script src="../../static/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../../static/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts', 'form'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            form = layui.form,
+            echarts = layui.echarts;
+        data_history()
+
+        function data_history(result = '西安') {
+            $.get('/data/history/weather?city=' + result, '', function (res) {
+                let weahter_data = res.weather_data;
+                let ws_data = res.ws_data;
+                let wd_data = res.wd_data;
+                let temp_data = res.temp_data;
+                /**
+                 * 气象分类
+                 */
+                var weatherPies = echarts.init(document.getElementById('weather-pies'), 'walden');
+                var optionPies = {
+                    title: {
+                        text: '历史天气分布',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        data: weahter_data.x,
+                    },
+                    series: [
+                        {
+                            name: '历史天气',
+                            type: 'pie',
+                            radius: '55%',
+                            center: ['70%', '80%'],
+                            roseType: 'radius',
+                            data: weahter_data.y,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+                weatherPies.setOption(optionPies);
+
+                /**
+                 * 玫瑰图表
+                 */
+                var wsPies = echarts.init(document.getElementById('ws-pies'), 'walden');
+                var optionPies = {
+                    title: {
+                        text: '历史风向分布',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        data: wd_data.x,
+                    },
+                    series: [
+                        {
+                            name: '历史风向',
+                            type: 'pie',
+                            radius: '55%',
+                            center: ['50%', '60%'],
+                            roseType: 'radius',
+                            data: wd_data.y,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+                wsPies.setOption(optionPies);
+                /**
+                 * 风向分布
+                 */
+                var wdPies = echarts.init(document.getElementById('wd-pies'), 'walden');
+                var optionPies = {
+                    title: {
+                        text: '历史风力分布',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        data: ws_data.x,
+                    },
+                    series: [
+                        {
+                            name: '历史风力',
+                            type: 'pie',
+                            radius: '55%',
+                            center: ['50%', '60%'],
+                            roseType: 'radius',
+                            data: ws_data.y,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+                wdPies.setOption(optionPies);
+
+
+                /**
+                 * 温度变化
+                 */
+                var tempRecords = echarts.init(document.getElementById('temp-records'), 'walden');
+
+                var optionRecords = {
+                    title: {
+                        text: '温度变化分析'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter(params) {
+                            console.log("aaa", params)
+                            var relVal = params[0].name;
+                            for (var i = 0, l = params.length; i < l; i++) {
+                                //遍历出来的值一般是字符串，需要转换成数字，再进项tiFixed四舍五入
+                                relVal += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + params[i].value + '℃'
+                            }
+                            return relVal;
+                        },
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    legend: {
+                        data: ['温度']
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: temp_data.x
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            axisLabel: {
+                                formatter: '{value} ℃'
+                            }
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '最高温度',
+                            type: 'line',
+                            stack: '最高温度',
+                            areaStyle: {},
+                            data: temp_data.y1
+                        },
+                        {
+                            name: '最低温度',
+                            type: 'line',
+                            stack: '最低温度',
+                            areaStyle: {},
+                            data: temp_data.y2
+                        }
+                    ]
+                };
+                tempRecords.setOption(optionRecords);
+
+                // echarts 窗口缩放自适应
+                window.onresize = function () {
+                    tempRecords.resize();
+                    wsPies.resize();
+                    wdPies.resize();
+                    weatherPies.resize();
+
+                }
+            });
+        }
+
+        // 监听搜索操作
+        window.changeCity = function () {
+            data_history($('#cityname').val())
+        }
+
+    });
+</script>
+</body>
+</html>

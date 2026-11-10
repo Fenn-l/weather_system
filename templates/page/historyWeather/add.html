@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>新增西安历史气象</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../static/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../static/css/public.css" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label required">城市</label>
+        <div class="layui-input-block">
+            <select name="cityname" lay-verify="required">
+                {% for city_name in city_list %}
+                    <option value="{{ city_name }}">{{ city_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label required">日期</label>
+        <div class="layui-input-block">
+            <input type="text" name="record_date" id="record_date" lay-verify="required" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">最高温度</label>
+        <div class="layui-input-block">
+            <input type="number" name="high" placeholder="请输入温度℃" lay-verify="required" value=""
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">最低温度</label>
+        <div class="layui-input-block">
+            <input type="number" name="low" placeholder="请输入温度℃" lay-verify="required" value=""
+                   class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">风向</label>
+        <div class="layui-input-block">
+            <select name="wd" lay-verify="required">
+                {% for wd in wd_list %}
+                    <option value="{{ wd }}">{{ wd }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item required">
+        <label class="layui-form-label">风力</label>
+        <div class="layui-input-block">
+            <input type="number" name="ws" placeholder="请输入风力（1-10级）" value=""
+                   class="layui-input"
+                   lay-verify="required">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label required">天气</label>
+        <div class="layui-input-block">
+            <select name="weather" lay-verify="required">
+                {% for weather in weather_list %}
+                    <option value="{{ weather }}">{{ weather }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认</button>
+        </div>
+    </div>
+</div>
+<script src="../../../static/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'laydate', 'layer'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate,
+            $ = layui.$;
+        laydate.render({
+            elem: '#record_date'
+        })
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            data = data.field
+            data.record_time = data.record_time_h + ":" + data.record_time_m
+            if (!data.ws || data.ws < 0 || data.ws > 10) {
+                return layer.msg("请输入正确的风力", {icon: 5});
+            }
+            $.post('/add/history/weather', data, function (response) {
+                if (response.success) {
+                    var iframeIndex = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(iframeIndex);
+                    parent.reload();
+                    parent.layer.msg(response.msg, {icon: 6});
+                } else {
+                    parent.layer.msg(response.msg, {icon: 5});
+                }
+            })
+            return false;
+        });
+
+    });
+</script>
+</body>
+</html>
